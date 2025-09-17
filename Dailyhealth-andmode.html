@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Health and Mood Journal</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #e0f7fa 0%, #bbdefb 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 500px;
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(to right, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+        
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        .form-container {
+            padding: 25px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border 0.3s;
+        }
+        
+        input:focus, select:focus, textarea:focus {
+            border-color: #4facfe;
+            outline: none;
+        }
+        
+        textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+        
+        .range-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .range-value {
+            font-weight: bold;
+            color: #4facfe;
+            min-width: 30px;
+        }
+        
+        button {
+            background: linear-gradient(to right, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 8px;
+            width: 100%;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(79, 172, 254, 0.4);
+        }
+        
+        .result-container {
+            padding: 20px;
+            margin-top: 20px;
+            background-color: #f8fdff;
+            border-radius: 10px;
+            border-left: 4px solid #4facfe;
+            display: none;
+        }
+        
+        .result-container h3 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .result-content {
+            color: #555;
+            line-height: 1.6;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .loading-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #4facfe;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 20px;
+            font-size: 12px;
+            color: #777;
+            border-top: 1px solid #eee;
+        }
+        
+        .history-btn {
+            background: linear-gradient(to right, #fdfcfb 0%, #e2d1c3 100%);
+            color: #333;
+            margin-top: 15px;
+        }
+        
+        .entry-item {
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-left: 3px solid #4facfe;
+        }
+        
+        .entry-date {
+            font-weight: bold;
+            color: #4facfe;
+            margin-bottom: 5px;
+        }
+        
+        .history-container {
+            display: none;
+            margin-top: 20px;
+        }
+        
+        .stats-container {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .stat-box {
+            background: linear-gradient(to right, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            border-radius: 8px;
+            padding: 10px;
+            text-align: center;
+            width: 48%;
+            margin-bottom: 10px;
+        }
+        
+        .stat-value {
+            font-size: 20px;
+            font-weight: bold;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                border-radius: 10px;
+            }
+            
+            .header {
+                padding: 20px;
+            }
+            
+            .form-container {
+                padding: 20px;
+            }
+            
+            .stat-box {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Daily Health and Mood Journal</h1>
+            <p>Track your mood and health, get personalized suggestions</p>
+        </div>
+        
+        <div class="form-container">
+            <div class="form-group">
+                <label for="mood">How are you feeling today?</label>
+                <select id="mood">
+                    <option value="">-- Select your mood --</option>
+                    <option value="Very Happy">Very Happy 😄</option>
+                    <option value="Happy">Happy 🙂</option>
+                    <option value="Neutral">Neutral 😐</option>
+                    <option value="Sad">Sad ☹</option>
+                    <option value="Stressed">Stressed 😣</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="sleep">How many hours did you sleep last night? (hours)</label>
+                <input type="number" id="sleep" min="0" max="24" step="0.5" placeholder="e.g., 7.5">
+            </div>
+            
+            <div class="form-group">
+                <label for="water">How much water did you drink today? (glasses)</label>
+                <input type="number" id="water" min="0" max="20" placeholder="e.g., 6">
+            </div>
+            
+            <div class="form-group">
+                <label for="tiredness">Tiredness level (0 to 10)</label>
+                <div class="range-container">
+                    <input type="range" id="tiredness" min="0" max="10" value="5">
+                    <span id="tirednessValue" class="range-value">5</span>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="notes">Additional notes (optional)</label>
+                <textarea id="notes" placeholder="Anything special like exercise, diet, or symptoms..."></textarea>
+            </div>
+            
+            <button id="analyzeBtn">Analyze and get suggestions</button>
+            <button class="history-btn" id="showHistoryBtn">View previous records</button>
+            
+            <div class="stats-container" id="statsContainer">
+                <div class="stat-box">
+                    <div class="stat-value" id="avgSleep">0</div>
+                    <div class="stat-label">Avg. Sleep</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value" id="avgWater">0</div>
+                    <div class="stat-label">Avg. Water</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value" id="commonMood">-</div>
+                    <div class="stat-label">Common Mood</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value" id="avgTiredness">0</div>
+                    <div class="stat-label">Avg. Tiredness</div>
+                </div>
+            </div>
+            
+            <div class="loading" id="loading">
+                <div class="loading-spinner"></div>
+                <p>Analyzing your data...</p>
+            </div>
+            
+            <div class="result-container" id="resultContainer">
+                <h3>Your personalized suggestions:</h3>
+                <div class="result-content" id="resultContent"></div>
+            </div>
+            
+            <div class="history-container" id="historyContainer">
+                <h3>Your previous records:</h3>
+                <div id="historyEntries"></div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>© 2023 Daily Health & Mood Journal | Take care of your health</p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const tirednessSlider = document.getElementById('tiredness');
+            const tirednessValue = document.getElementById('tirednessValue');
+            const analyzeBtn = document.getElementById('analyzeBtn');
+            const showHistoryBtn = document.getElementById('showHistoryBtn');
+            const loadingElement = document.getElementById('loading');
+            const resultContainer = document.getElementById('resultContainer');
+            const resultContent = document.getElementById('resultContent');
+            const historyContainer = document.getElementById('historyContainer');
+            const historyEntries = document.getElementById('historyEntries');
+            const statsContainer = document.getElementById('statsContainer');
+            const avgSleepElement = document.getElementById('avgSleep');
+            const avgWaterElement = document.getElementById('avgWater');
+            const commonMoodElement = document.getElementById('commonMood');
+            const avgTirednessElement = document.getElementById('avgTiredness');
+            
+            // Update tiredness value display
+            tirednessSlider.addEventListener('input', function() {
+                tirednessValue.textContent = this.value;
+            });
+            
+            // Load previous entries from localStorage
+            function loadEntries() {
+                const entries = JSON.parse(localStorage.getItem('healthJournalEntries')) || [];
+                return entries;
+            }
+            
+            // Save entry to localStorage
+            function saveEntry(entry) {
+                const entries = loadEntries();
+                entries.push(entry);
+                // Keep only last 10 entries
+                if (entries.length > 10) entries.shift();
+                localStorage.setItem('healthJournalEntries', JSON.stringify(entries));
+                updateStats();
+            }
+            
+            // Update statistics
+            function updateStats() {
+                const entries = loadEntries();
+                if (entries.length === 0) {
+                    statsContainer.style.display = 'none';
+                    return;
+                }
+                
+                statsContainer.style.display = 'flex';
+                
+                let totalSleep = 0;
+                let totalWater = 0;
+                let totalTiredness = 0;
+                const moodCounts = {};
+                
+                entries.forEach(entry => {
+                    totalSleep += parseFloat(entry.sleep);
+                    totalWater += parseInt(entry.water);
+                    totalTiredness += parseInt(entry.tiredness);
+                    
+                    if (moodCounts[entry.mood]) {
+                        moodCounts[entry.mood]++;
+                    } else {
+                        moodCounts[entry.mood] = 1;
+                    }
+                });
+                
+                // Calculate averages
+                avgSleepElement.textContent = (totalSleep / entries.length).toFixed(1);
+                avgWaterElement.textContent = Math.round(totalWater / entries.length);
+                avgTirednessElement.textContent = (totalTiredness / entries.length).toFixed(1);
+                
+                // Find most common mood
+                let commonMood = '';
+                let maxCount = 0;
+                
+                for (const mood in moodCounts) {
+                    if (moodCounts[mood] > maxCount) {
+                        maxCount = moodCounts[mood];
+                        commonMood = mood;
+                    }
+                }
+                
+                commonMoodElement.textContent = commonMood;
+            }
+            
+            // Show history entries
+            function showHistory() {
+                const entries = loadEntries();
+                historyEntries.innerHTML = '';
+                
+                if (entries.length === 0) {
+                    historyEntries.innerHTML = '<p>No records yet.</p>';
+                    return;
+                }
+                
+                entries.reverse().forEach(entry => {
+                    const entryDate = new Date(entry.date).toLocaleDateString('en-US');
+                    const entryElement = document.createElement('div');
+                    entryElement.className = 'entry-item';
+                    entryElement.innerHTML = `
+                        <div class="entry-date">${entryDate}</div>
+                        <div>Mood: ${entry.mood}</div>
+                        <div>Sleep: ${entry.sleep} hours</div>
+                        <div>Water: ${entry.water} glasses</div>
+                        <div>Tiredness: ${entry.tiredness}/10</div>
+                        ${entry.notes ? `<div>Notes: ${entry.notes}</div>` : ''}
+                    `;
+                    historyEntries.appendChild(entryElement);
+                });
+            }
+            
+            // Toggle history view
+            showHistoryBtn.addEventListener('click', function() {
+                if (historyContainer.style.display === 'block') {
+                    historyContainer.style.display = 'none';
+                    this.textContent = 'View previous records';
+                } else {
+                    historyContainer.style.display = 'block';
+                    resultContainer.style.display = 'none';
+                    this.textContent = 'Hide records';
+                    showHistory();
+                }
+            });
+            
+            // Analyze button click handler
+            analyzeBtn.addEventListener('click', function() {
+                const mood = document.getElementById('mood').value;
+                const sleep = document.getElementById('sleep').value;
+                const water = document.getElementById('water').value;
+                const tiredness = document.getElementById('tiredness').value;
+                const notes = document.getElementById('notes').value;
+                
+                // Simple validation
+                if (!mood) {
+                    alert('Please select your mood');
+                    return;
+                }
+                
+                if (!sleep || sleep < 0 || sleep > 24) {
+                    alert('Please enter a valid sleep duration (0-24 hours)');
+                    return;
+                }
+                
+                if (!water || water < 0) {
+                    alert('Please enter water intake amount');
+                    return;
+                }
+                
+                // Show loading
+                loadingElement.style.display = 'block';
+                resultContainer.style.display = 'none';
+                historyContainer.style.display = 'none';
+                showHistoryBtn.textContent = 'View previous records';
+                
+                // Save entry
+                const entry = {
+                    date: new Date().toISOString(),
+                    mood,
+                    sleep,
+                    water,
+                    tiredness,
+                    notes
+                };
+                saveEntry(entry);
+                
+                // Simulate API call with timeout
+                setTimeout(function() {
+                    // Get analysis based on inputs
+                    const analysis = analyzeInputs(mood, sleep, water, tiredness, notes);
+                    
+                    // Display result
+                    resultContent.innerHTML = analysis;
+                    loadingElement.style.display = 'none';
+                    resultContainer.style.display = 'block';
+                    
+                    // Scroll to result
+                    resultContainer.scrollIntoView({ behavior: 'smooth' });
+                }, 1500);
+            });
+            
+            // Function to analyze inputs and generate tips
+            function analyzeInputs(mood, sleep, water, tiredness, notes) {
+                let tips = [];
+                
+                // Analyze sleep
+                if (sleep < 6) {
+                    tips.push('Your sleep duration is low. Try to get at least 7-8 hours of sleep. Reduce mobile phone usage before bed and create a calm environment.');
+                } else if (sleep > 9) {
+                    tips.push('You are sleeping too much, which can sometimes cause fatigue. Try to maintain a regular sleep schedule.');
+                } else {
+                    tips.push('Your sleep duration is good. Keep it up!');
+                }
+                
+                // Analyze water
+                const waterIntake = parseInt(water);
+                if (waterIntake < 5) {
+                    tips.push('Your water intake is low. Aim to drink at least 8 glasses of water throughout the day. Proper hydration helps maintain energy levels and keeps your body healthy.');
+                } else if (waterIntake >= 5 && waterIntake < 8) {
+                    tips.push('Your water intake is okay, but drinking a little more water could give you more energy.');
+                } else {
+                    tips.push('Your water intake is excellent! Continue to stay hydrated.');
+                }
+                
+                // Analyze tiredness
+                const tirednessLevel = parseInt(tiredness);
+                if (tirednessLevel >= 7) {
+                    tips.push('You are experiencing high levels of tiredness. Try practicing some relaxation techniques like deep breathing. Also, eat nutrient-rich foods and take short breaks regularly.');
+                } else if (tirednessLevel >= 4) {
+                    tips.push('You are experiencing moderate tiredness. Light exercise or a walk could boost your energy.');
+                } else {
+                    tips.push('Your energy levels seem good. Keep up whatever you\'re doing!');
+                }
+                
+                // Analyze mood
+                if (mood.includes('Sad') || mood.includes('Stressed')) {
+                    tips.push('Your mood seems low today. Take some time for your hobbies, spend time in nature, or talk to a friend. Remember, this will pass.');
+                } else if (mood.includes('Happy')) {
+                    tips.push('Your positive mood is great for your health! Keep participating in positive activities to maintain it.');
+                }
+                
+                // Add notes-based tip if provided
+                if (notes) {
+                    if (notes.toLowerCase().includes('exercise') || notes.toLowerCase().includes('walk') || notes.toLowerCase().includes('run')) {
+                        tips.push('Great job exercising today! Regular physical activity improves both physical and mental health.');
+                    }
+                    
+                    if (notes.toLowerCase().includes('fruit') || notes.toLowerCase().includes('vegetable') || notes.toLowerCase().includes('healthy')) {
+                        tips.push('Your healthy eating habits are paying off! A balanced diet is key to maintaining good health.');
+                    }
+                }
+                
+                // Add general health tip
+                tips.push('Maintaining a balanced diet and regular physical activity are essential for a healthy lifestyle.');
+                
+                // Format the tips with line breaks
+                return tips.map(tip => `<p><i class="fas fa-check-circle" style="color: #4facfe;"></i> ${tip}</p>`).join('');
+            }
+            
+            // Initialize stats on page load
+            updateStats();
+        });
+    </script>
+</body>
+</html>
